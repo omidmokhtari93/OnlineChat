@@ -4,6 +4,9 @@ import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import '../../node_modules/font-awesome/css/font-awesome.min.css';
 import Login from '../Components/Login';
 import http from 'axios';
+import notifierConfig from '../Shared/Notification';
+import notifier from "simple-react-notifications";
+import Chat from '../Components/Chat';
 
 export default class App extends Component {
     constructor(props) {
@@ -11,13 +14,18 @@ export default class App extends Component {
         this.state = {
             user: '',
             pass: '',
+            loading: false,
             loggedIn: false
         }
+        notifier.configure(notifierConfig);
+
     }
 
     userLogin = () => {
+        this.setState({ loading: true })
         http.get('/api/Auth', { params: { user: this.state.user, pass: this.state.pass } }).then(response => {
-            this.setState({loggedIn: response.data})
+            !response.data && notifier.error('نام کاربری یا رمز عبور اشتباه است');
+            this.setState({ loggedIn: response.data, loading: false })
         })
     }
 
@@ -30,14 +38,19 @@ export default class App extends Component {
     }
 
     render() {
-        if (!this.state.loggedIn) {
-            return (
-                <div className="container p-2 text-center">
-                    <Login user={this.handleUser} pass={this.handlePass} login={this.userLogin} />
-                </div>
-            );
-        } else {
-            return null
-        }
+        return (
+            <Wrapper>
+                {!this.state.loggedIn ?
+                    <div className="container p-2 text-center">
+                        <Login user={this.handleUser}
+                            pass={this.handlePass}
+                            login={this.userLogin}
+                            loading={this.state.loading} />
+                    </div>
+                    :
+                    <Chat/>
+                }
+            </Wrapper>
+        )
     }
 }
