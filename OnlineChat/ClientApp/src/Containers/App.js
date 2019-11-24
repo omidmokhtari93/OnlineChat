@@ -7,6 +7,7 @@ import http from 'axios';
 import notifierConfig from '../Shared/Notification';
 import notifier from "simple-react-notifications";
 import Chat from '../Components/Chat';
+import ChatHub from '../Components/ChatHub';
 
 export default class App extends Component {
     constructor(props) {
@@ -40,7 +41,8 @@ export default class App extends Component {
     render() {
         return (
             <Wrapper>
-                {!this.state.loggedIn ?
+                <ChatHub />
+                {/* {!this.state.loggedIn ?
                     <div className="container p-2 text-center">
                         <Login user={this.handleUser}
                             pass={this.handlePass}
@@ -49,7 +51,7 @@ export default class App extends Component {
                     </div>
                     :
                     <Chat/>
-                }
+                } */}
             </Wrapper>
         )
     }
