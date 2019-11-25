@@ -16,7 +16,7 @@ export default class App extends Component {
             user: '',
             pass: '',
             loading: false,
-            loggedIn: false
+            loggedIn: true
         }
         notifier.configure(notifierConfig);
 
@@ -41,8 +41,7 @@ export default class App extends Component {
     render() {
         return (
             <Wrapper>
-                <ChatHub />
-                {/* {!this.state.loggedIn ?
+                {!this.state.loggedIn ?
                     <div className="container p-2 text-center">
                         <Login user={this.handleUser}
                             pass={this.handlePass}
@@ -50,8 +49,8 @@ export default class App extends Component {
                             loading={this.state.loading} />
                     </div>
                     :
-                    <Chat/>
-                } */}
+                    <Chat />
+                }
             </Wrapper>
         )
     }

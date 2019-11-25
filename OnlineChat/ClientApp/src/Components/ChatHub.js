@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import * as signalR from '@aspnet/signalr/dist/browser/signalr';
-import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
 
 class ChatHub extends Component {
 
