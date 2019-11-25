@@ -16,7 +16,8 @@ export default class App extends Component {
             user: '',
             pass: '',
             loading: false,
-            loggedIn: true
+            loggedIn: false,
+            username: ''
         }
         notifier.configure(notifierConfig);
 
@@ -38,18 +39,23 @@ export default class App extends Component {
         this.setState({ pass: e.target.value })
     }
 
+    handleUserName = (e) => {
+        this.setState({ username: e.target.value })
+    }
+
     render() {
         return (
             <Wrapper>
                 {!this.state.loggedIn ?
                     <div className="container p-2 text-center">
-                        <Login user={this.handleUser}
+                        <Login user={this.handleUser} 
+                            username={this.handleUserName}
                             pass={this.handlePass}
                             login={this.userLogin}
                             loading={this.state.loading} />
                     </div>
                     :
-                    <Chat />
+                    <Chat username={this.state.username}/>
                 }
             </Wrapper>
         )

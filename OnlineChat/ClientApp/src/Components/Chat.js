@@ -10,7 +10,9 @@ export default class Chat extends Component {
             windowHeight: 0,
             signalRConnection: null,
             connectionStatus: false,
-            onlineUsers: []
+            onlineUsers: 0,
+            messages: [],
+            userNames: []
         }
     }
 
@@ -19,21 +21,19 @@ export default class Chat extends Component {
             signalRConnection: new signalR.HubConnectionBuilder().withUrl("/chatHub", {
                 skipNegotiation: true,
                 transport: signalR.HttpTransportType.WebSockets
-            }).build(), 
+            }).build(),
             windowHeight: document.body.scrollHeight - 50
         })
         setTimeout(() => {
-            this.state.signalRConnection.start().then((e) => {
-                this.state.signalRConnection.on('UserConnected',function(connectionId){
-                    if (this.state.onlineUsers === undefined) {
-                        this.setState({ onlineUsers: [...this.state.onlineUsers, connectionId] })
-                        console.log(connectionId)
-                    }
-                })
-                this.state.signalRConnection.on('UserDisconnected',function(connectionId){
-                    this.setState({ onlineUsers: this.state.onlineUsers.splice(connectionId, 1) })
-                })
+            this.state.signalRConnection.start().then(() => {
                 this.setState({ connectionStatus: true })
+                this.state.signalRConnection.on('UserConnected', (connectionId) => {
+                    this.setState({ onlineUsers: connectionId.length })
+                    this.getUserNames()
+                })
+                this.state.signalRConnection.on('UserDisconnected', this.props.username, (connectionId) => {
+                    this.setState({ onlineUsers: connectionId.length })
+                })
             }).catch((e) => {
                 this.setState({ connectionStatus: false })
             })
@@ -51,12 +51,21 @@ export default class Chat extends Component {
             console.log('message received : ', message)
         })
     }
+
+    getUserNames = () => {
+        this.state.signalRConnection.invoke('UserNames', this.props.username).then().catch();
+        this.state.signalRConnection.on('UserNames', (usernames) => {
+            this.setState({ userNames: usernames })
+        })
+    }
+
     render() {
         return (
             <div className="container p-2 rtl text-center sans">
                 <div className="card card-body p-1 d-inline-block w-50 w-100 text-right">
                     <div className="mb-1">
-                        تعداد افراد آنلاین: {this.state.onlineUsers.length}
+                        تعداد افراد آنلاین: {this.state.onlineUsers} 
+                        {this.state.userNames.map((name, index) => <span key={index}>{name}</span>)}
                         {this.state.connectionStatus
                             ? <span className="float-left text-success">آنلاین</span>
                             : <div className="float-left text-primary">
@@ -67,9 +76,22 @@ export default class Chat extends Component {
                             </div>
                         }
                     </div>
-                    <div className="card chat-area" style={{height: this.state.windowHeight}}>
+                    <div className="card chat-area" style={{ height: this.state.windowHeight }}>
                         <div className="chat-badges">
-                            <ReceiverBadge message="سلام؟" datetime="4:00 PM" />
+
+                        </div>
+                        <div className="bottom-controls">
+                            <input placeholder="پیام ..." />
+                            <button className="fa fa-send-o text-primary" onClick={this.sendMessage}></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+}
+
+{/* <ReceiverBadge message="سلام؟" datetime="4:00 PM" />
                             <SenderBadge message="سلام عزیزم چطوری خوبی چه خبرا؟" datetime="4:00 PM" />
                             <ReceiverBadge message="سلام عزیزم چطوری خوبی چه خبرا؟" datetime="4:00 PM" />
                             <ReceiverBadge message=" سلام عزیزم چطوری خوبی چه خبرا؟ کجا هستی چیکار میکنی کی میای کی
@@ -85,15 +107,4 @@ export default class Chat extends Component {
                             <ReceiverBadge message=" سلام عزیزم چطوری خوبی چه خبرا؟ کجا هستی چیکار میکنی کی میای کی
                              میری مجا هستی بیا زود باش بع دیگه چیز خنک وخه بای بدو" datetime="4:00 PM" />
                             <ReceiverBadge message="سلام عزیزم چطوری خوبی چه خبرا؟" datetime="4:00 PM" />
-                            <SenderBadge message="سلام؟" datetime="4:00 PM" />
-                        </div>
-                        <div className="bottom-controls">
-                            <input placeholder="پیام ..." />
-                            <button className="fa fa-send-o text-primary" onClick={this.sendMessage}></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-}
+                            <SenderBadge message="سلام؟" datetime="4:00 PM" /> */}

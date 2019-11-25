@@ -3,6 +3,7 @@ import React from 'react';
 const Login = (props) => {
     return (
         <div className="card card-body sans d-inline-block text-right">
+            <input className="form-control mb-2 rtl" placeholder="نام و نام خانوادگی ..." onChange={props.username} />
             <input className="form-control mb-2 rtl" placeholder="نام کاربری..." onChange={props.user} />
             <input className="form-control mb-2 rtl" placeholder="رمز عبور..." onChange={props.pass} type="password" />
             <button className="btn btn-primary float-left" onClick={props.login}>

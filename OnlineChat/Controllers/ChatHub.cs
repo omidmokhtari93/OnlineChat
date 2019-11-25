@@ -9,21 +9,39 @@ namespace OnlineChat.Hubs
     public class ChatHub : Hub
     {
         static HashSet<string> CurrentConnections = new HashSet<string>();
+        static HashSet<string> CurrentUsernames = new HashSet<string>();
 
         public async Task Send(string message)
         {
             await Clients.All.SendAsync("Receive", message);
         }
 
+        public async Task UserNames(string username)
+        {
+            if (!CurrentUsernames.Contains(username))
+            {
+                CurrentUsernames.Add(username);
+            }
+            await Clients.All.SendAsync("UserNames", CurrentUsernames);
+        }
+
         public override async Task OnConnectedAsync()
         {
-            await Clients.All.SendAsync("UserConnected", Context.ConnectionId);
+            if (!CurrentConnections.Contains(Context.ConnectionId))
+            {
+                CurrentConnections.Add(Context.ConnectionId);
+            }
+            await Clients.All.SendAsync("UserConnected", CurrentConnections);
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception ex)
         {
-            await Clients.All.SendAsync("UserDisconnected", Context.ConnectionId);
+            if (CurrentConnections.Contains(Context.ConnectionId))
+            {
+                CurrentConnections.Remove(Context.ConnectionId);
+            }
+            await Clients.All.SendAsync("UserDisconnected", CurrentConnections);
             await base.OnDisconnectedAsync(ex);
         }
     }
