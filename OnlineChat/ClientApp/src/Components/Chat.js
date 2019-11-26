@@ -21,10 +21,11 @@ export default class Chat extends Component {
     componentDidMount = () => {
         const username = this.props.username === '' ? 'guest' : this.props.username;
         this.setState({
-            signalRConnection: new signalR.HubConnectionBuilder().withUrl("/chatHub?username=" + username, {
-                skipNegotiation: true,
-                transport: signalR.HttpTransportType.WebSockets
-            }).build(),
+            signalRConnection: new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub?username=" + username, {
+                    skipNegotiation: true,
+                    transport: signalR.HttpTransportType.WebSockets
+                }).build(),
             windowHeight: document.body.scrollHeight - 50
         })
         setTimeout(() => {
