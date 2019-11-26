@@ -12,9 +12,15 @@ namespace OnlineChat.Controllers
     public class Login : Controller
     {
         [HttpGet("/api/Auth")]
-        public bool Auth(string user , string pass)
+        public bool Auth(string user, string pass)
         {
             return user == "user" && pass == "123321";
+        }
+
+        [HttpGet("/api/GetDateTime")]
+        public string GetDateTime()
+        {
+            return DateTime.Now.ToString("hh:mm");
         }
     }
 }

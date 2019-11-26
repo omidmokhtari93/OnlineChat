@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import * as signalR from '@aspnet/signalr/dist/browser/signalr';
 import ReceiverBadge from './ReceiverBadge';
 import SenderBadge from './SenderBadge';
+import http from 'axios';
 
 export default class Chat extends Component {
     constructor(props) {
@@ -10,15 +11,17 @@ export default class Chat extends Component {
             windowHeight: 0,
             signalRConnection: null,
             connectionStatus: false,
-            onlineUsers: 0,
+            message: '',
             messages: [],
-            userNames: []
+            userNames: [],
+            sendLoading: false
         }
     }
 
     componentDidMount = () => {
+        const username = this.props.username === '' ? 'guest' : this.props.username;
         this.setState({
-            signalRConnection: new signalR.HubConnectionBuilder().withUrl("/chatHub", {
+            signalRConnection: new signalR.HubConnectionBuilder().withUrl("/chatHub?username=" + username, {
                 skipNegotiation: true,
                 transport: signalR.HttpTransportType.WebSockets
             }).build(),
@@ -27,36 +30,50 @@ export default class Chat extends Component {
         setTimeout(() => {
             this.state.signalRConnection.start().then(() => {
                 this.setState({ connectionStatus: true })
-                this.state.signalRConnection.on('UserConnected', (connectionId) => {
-                    this.setState({ onlineUsers: connectionId.length })
-                    this.getUserNames()
+                this.state.signalRConnection.on('UserConnected', (userInfo) => {
+                    this.setState({ userNames: userInfo.currentUsers })
                 })
-                this.state.signalRConnection.on('UserDisconnected', this.props.username, (connectionId) => {
-                    this.setState({ onlineUsers: connectionId.length })
+                this.state.signalRConnection.on('UserDisconnected', (userInfo) => {
+                    this.setState({ userNames: userInfo.currentUsers })
                 })
             }).catch((e) => {
                 this.setState({ connectionStatus: false })
-            })
+            });
+            this.state.signalRConnection.on('Receive', (message) => {
+                this.setState({ messages: [...this.state.messages, { message: message.message, datetime: message.datetime, receiver: false }] })
+                this.scrollBottom();
+            });
+
+            window.addEventListener('resize', this.handleResize);
         }, 1000);
+
     }
 
-    sendMessage = () => {
-        this.state.signalRConnection.invoke('Send', 'hello').then((e) => {
-            console.log(e)
-        }).catch(err => {
-            console.log(err)
-        });
+    handleResize = (e) => {
+        this.setState({ windowHeight: document.body.scrollHeight - 50 })
+    }
 
-        this.state.signalRConnection.on('Receive', (message) => {
-            console.log('message received : ', message)
+    sendMessage = (e) => {
+        this.setState({ sendLoading: true })
+        e.preventDefault();
+        http.get('/api/GetDateTime').then(resp => {
+            this.state.signalRConnection.invoke('Send', this.state.message).then((e) => {
+                this.setState({ messages: [...this.state.messages, { message: this.state.message, datetime: resp.data, receiver: true }] })
+                this.setState({ message: '', sendLoading: false })
+                this.scrollBottom();
+            }).catch(err => {
+                console.log('unhandled error')
+            });
         })
     }
 
-    getUserNames = () => {
-        this.state.signalRConnection.invoke('UserNames', this.props.username).then().catch();
-        this.state.signalRConnection.on('UserNames', (usernames) => {
-            this.setState({ userNames: usernames })
-        })
+    scrollBottom = () => {
+        var list = document.getElementById("chatBadges");
+        list.scrollTop = list.offsetHeight * 1000;
+    }
+
+    handleMessage = (e) => {
+        this.setState({ message: e.target.value })
     }
 
     render() {
@@ -64,8 +81,8 @@ export default class Chat extends Component {
             <div className="container p-2 rtl text-center sans">
                 <div className="card card-body p-1 d-inline-block w-50 w-100 text-right">
                     <div className="mb-1">
-                        تعداد افراد آنلاین: {this.state.onlineUsers} 
-                        {this.state.userNames.map((name, index) => <span key={index}>{name}</span>)}
+                        افراد آنلاین:
+                        {this.state.userNames.map((name, index) => <span className="badge badge-primary mx-1 sans" key={index}>{name}</span>)}
                         {this.state.connectionStatus
                             ? <span className="float-left text-success">آنلاین</span>
                             : <div className="float-left text-primary">
@@ -77,12 +94,22 @@ export default class Chat extends Component {
                         }
                     </div>
                     <div className="card chat-area" style={{ height: this.state.windowHeight }}>
-                        <div className="chat-badges">
-
+                        <div className="chat-badges" id="chatBadges">
+                            {this.state.messages.map((message, index) => {
+                                return message.receiver ? <ReceiverBadge key={index} message={message.message} datetime={message.datetime} />
+                                    : <SenderBadge key={index} message={message.message} datetime={message.datetime} />
+                            })}
                         </div>
+
+                        {this.state.sendLoading && <div className="spinner-border loading-sm send-loading" role="status">
+                            <span className="sr-only"></span>
+                        </div>}
+
                         <div className="bottom-controls">
-                            <input placeholder="پیام ..." />
-                            <button className="fa fa-send-o text-primary" onClick={this.sendMessage}></button>
+                            <form onSubmit={this.sendMessage}>
+                                <input placeholder="پیام ..." onChange={this.handleMessage} value={this.state.message} />
+                                <button type="submit" className="fa fa-send-o text-primary"></button>
+                            </form>
                         </div>
                     </div>
                 </div>

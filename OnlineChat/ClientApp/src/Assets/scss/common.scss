@@ -171,6 +171,7 @@ table {
     background-image: url('../images/back.jpg');
     background-repeat: no-repeat;
     background-size: cover;
+    height: 100%;
   }
 
 
@@ -248,4 +249,11 @@ table {
     direction: ltr;
     font-size: 10px;
   }
+}
+
+.send-loading{
+  position: absolute;
+  right: 10px;
+  bottom: 60px;
+  opacity: .6;
 }
