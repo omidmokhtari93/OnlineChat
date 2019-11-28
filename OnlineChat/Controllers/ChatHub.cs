@@ -10,7 +10,6 @@ namespace OnlineChat.Hubs
     public class ChatHub : Hub
     {
         static HashSet<string> CurrentConnections = new HashSet<string>();
-        static HashSet<string> CurrentUsers = new HashSet<string>();
 
         public async Task Send(string message)
         {
@@ -28,12 +27,7 @@ namespace OnlineChat.Hubs
             {
                 CurrentConnections.Add(Context.ConnectionId);
             }
-
-            if (!CurrentUsers.Contains(username))
-            {
-                CurrentUsers.Add(username);
-            }
-            await Clients.All.SendAsync("UserConnected", new { CurrentUsers, CurrentConnections });
+            await Clients.All.SendAsync("UserConnected", CurrentConnections);
             await base.OnConnectedAsync();
         }
 
@@ -44,11 +38,7 @@ namespace OnlineChat.Hubs
             {
                 CurrentConnections.Remove(Context.ConnectionId);
             }
-            if (CurrentUsers.Contains(username))
-            {
-                CurrentUsers.Remove(username);
-            }
-            await Clients.All.SendAsync("UserDisconnected", new { CurrentUsers, CurrentConnections });
+            await Clients.All.SendAsync("UserDisconnected", CurrentConnections);
             await base.OnDisconnectedAsync(ex);
         }
     }

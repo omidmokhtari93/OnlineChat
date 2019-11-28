@@ -19,23 +19,19 @@ export default class Chat extends Component {
     }
 
     componentDidMount = () => {
-        const username = this.props.username === '' ? 'guest' : this.props.username;
         this.setState({
             signalRConnection: new signalR.HubConnectionBuilder()
-                .withUrl("/chatHub?username=" + username, {
-                    skipNegotiation: true,
-                    transport: signalR.HttpTransportType.WebSockets
-                }).build(),
+                .withUrl("/chatHub").build(),
             windowHeight: document.body.scrollHeight - 50
         })
         setTimeout(() => {
             this.state.signalRConnection.start().then(() => {
                 this.setState({ connectionStatus: true })
-                this.state.signalRConnection.on('UserConnected', (userInfo) => {
-                    this.setState({ userNames: userInfo.currentUsers })
+                this.state.signalRConnection.on('UserConnected', (currentConnections) => {
+                    this.setState({ userNames: currentConnections })
                 })
-                this.state.signalRConnection.on('UserDisconnected', (userInfo) => {
-                    this.setState({ userNames: userInfo.currentUsers })
+                this.state.signalRConnection.on('UserDisconnected', (currentConnections) => {
+                    this.setState({ userNames: currentConnections })
                 })
             }).catch((e) => {
                 this.setState({ connectionStatus: false })
@@ -98,8 +94,7 @@ export default class Chat extends Component {
             <div className="container p-2 rtl text-center sans">
                 <div className="card card-body p-1 d-inline-block w-50 w-100 text-right">
                     <div className="mb-1">
-                        افراد آنلاین:
-                        {this.state.userNames.map((name, index) => <span className="badge badge-primary mx-1 sans" key={index}>{name}</span>)}
+                        افراد آنلاین: {this.state.userNames.length}
                         {this.state.connectionStatus
                             ? <span className="float-left text-success">آنلاین</span>
                             : <div className="float-left text-primary">
