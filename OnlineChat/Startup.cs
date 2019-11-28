@@ -22,15 +22,8 @@ namespace OnlineChat
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(o => o.AddPolicy("CorsPolicy", builder => {
-                builder
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials()
-                    .WithOrigins("http://chat.bornatek.ir");
-            }));
-
             services.AddSignalR();
+            services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // In production, the React files will be served from this directory
@@ -57,8 +50,12 @@ namespace OnlineChat
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
-            app.UseCors("default");
-
+            app.UseCors(cors => {
+                cors.AllowAnyHeader();
+                cors.AllowAnyOrigin();
+                cors.AllowAnyMethod();
+                cors.AllowCredentials();
+            });
             app.UseSignalR(routes =>
             {
                 routes.MapHub<ChatHub>("/chatHub");
@@ -70,7 +67,7 @@ namespace OnlineChat
                     name: "default",
                     template: "{controller}/{action=Index}/{id?}");
             });
-
+            app.UseWebSockets();
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "ClientApp";

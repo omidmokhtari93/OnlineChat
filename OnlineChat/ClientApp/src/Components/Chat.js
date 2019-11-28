@@ -41,7 +41,13 @@ export default class Chat extends Component {
                 this.setState({ connectionStatus: false })
             });
             this.state.signalRConnection.on('Receive', (message) => {
-                this.setState({ messages: [...this.state.messages, { message: message.message, datetime: message.datetime, receiver: false }] })
+                this.setState({
+                    messages: [...this.state.messages, {
+                        message: message.message,
+                        datetime: message.datetime,
+                        receiver: false
+                    }]
+                })
                 this.scrollBottom();
             });
 
@@ -57,20 +63,30 @@ export default class Chat extends Component {
     sendMessage = (e) => {
         this.setState({ sendLoading: true })
         e.preventDefault();
-        http.get('/api/GetDateTime').then(resp => {
+        this.getDateTimeForSender().then(response => {
             this.state.signalRConnection.invoke('Send', this.state.message).then((e) => {
-                this.setState({ messages: [...this.state.messages, { message: this.state.message, datetime: resp.data, receiver: true }] })
-                this.setState({ message: '', sendLoading: false })
+                this.setState({
+                    messages: [...this.state.messages, {
+                        message: this.state.message,
+                        datetime: response,
+                        receiver: true
+                    }]
+                })
                 this.scrollBottom();
-            }).catch(err => {
-                console.log('unhandled error')
-            });
-        })
+            }).catch(er => console.log(er))
+        }).catch(err => {
+            console.log('unhandled error')
+        });
+    }
+
+    getDateTimeForSender = () => {
+        return http.get('/api/GetDateTime').then((response) => { return response.data })
     }
 
     scrollBottom = () => {
         var list = document.getElementById("chatBadges");
         list.scrollTop = list.offsetHeight * 1000;
+        this.setState({ message: '', sendLoading: false })
     }
 
     handleMessage = (e) => {
@@ -118,21 +134,3 @@ export default class Chat extends Component {
         )
     }
 }
-
-{/* <ReceiverBadge message="سلام؟" datetime="4:00 PM" />
-                            <SenderBadge message="سلام عزیزم چطوری خوبی چه خبرا؟" datetime="4:00 PM" />
-                            <ReceiverBadge message="سلام عزیزم چطوری خوبی چه خبرا؟" datetime="4:00 PM" />
-                            <ReceiverBadge message=" سلام عزیزم چطوری خوبی چه خبرا؟ کجا هستی چیکار میکنی کی میای کی
-                             میری مجا هستی بیا زود باش بع دیگه چیز خنک وخه بای بدو" datetime="4:00 PM" />
-                            <SenderBadge message="سسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسیییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییی" datetime="4:00 PM" />
-                            <ReceiverBadge message="سسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسسیییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییییی" datetime="4:00 PM" />
-                            <SenderBadge message="سلام؟" datetime="4:00 PM" />
-                            <ReceiverBadge message=" سلام عزیزم چطوری خوبی چه خبرا؟ کجا هستی چیکار میکنی کی میای کی
-                             میری مجا هستی بیا زود باش بع دیگه چیز خنک وخه بای بدو" datetime="4:00 PM" />
-                            <ReceiverBadge message="سلام عزیزم چطوری خوبی چه خبرا؟" datetime="4:00 PM" />
-                            <SenderBadge message="سلام؟" datetime="4:00 PM" />
-                            <SenderBadge message="سلام؟" datetime="4:00 PM" />
-                            <ReceiverBadge message=" سلام عزیزم چطوری خوبی چه خبرا؟ کجا هستی چیکار میکنی کی میای کی
-                             میری مجا هستی بیا زود باش بع دیگه چیز خنک وخه بای بدو" datetime="4:00 PM" />
-                            <ReceiverBadge message="سلام عزیزم چطوری خوبی چه خبرا؟" datetime="4:00 PM" />
-                            <SenderBadge message="سلام؟" datetime="4:00 PM" /> */}
