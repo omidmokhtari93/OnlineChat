@@ -57,7 +57,8 @@ namespace OnlineChat.Controllers
 
             return new ObjectResult(new LoginResponse
             {
-                IsSuccess = result.Succeeded
+                IsSuccess = result.Succeeded,
+                Errors = result.Errors
             });
         }
 
@@ -83,5 +84,6 @@ namespace OnlineChat.Controllers
     public class LoginResponse
     {
         public bool IsSuccess { get; set; }
+        public object Errors { get; set; }
     }
 }

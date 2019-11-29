@@ -1,21 +1,21 @@
 @font-face {
-  font-family: 'sans';
-  src: url('../fonts/IRANSans.woff2')
+  font-family: "sans";
+  src: url("../fonts/IRANSans.woff2");
 }
 
 @font-face {
-  font-family: 'light_sans';
-  src: url('../fonts/IRANSansWeb_Light.woff2')
+  font-family: "light_sans";
+  src: url("../fonts/IRANSansWeb_Light.woff2");
 }
 
 @font-face {
-  font-family: 'medium_sans';
-  src: url('../fonts/IRANSansWeb_Medium.woff2')
+  font-family: "medium_sans";
+  src: url("../fonts/IRANSansWeb_Medium.woff2");
 }
 
 @font-face {
-  font-family: 'bold_sans';
-  src: url('../fonts/IRANSansWeb_Bold.woff2')
+  font-family: "bold_sans";
+  src: url("../fonts/IRANSansWeb_Bold.woff2");
 }
 
 body,
@@ -100,9 +100,8 @@ html {
 }
 
 .cursor {
-  cursor: pointer;
+  cursor: pointer !important;
 }
-
 
 .rounded-top-0 {
   border-top-left-radius: 0;
@@ -169,12 +168,11 @@ table {
     padding-bottom: 55px;
     padding-top: 3px;
     box-sizing: content-box;
-    background-image: url('../images/back.jpg');
+    background-image: url("../images/back.jpg");
     background-repeat: no-repeat;
     background-size: cover;
     height: 100%;
   }
-
 
   .bottom-controls {
     position: absolute;
@@ -207,8 +205,8 @@ table {
 }
 
 .receiver-badge {
-    padding: 2px 5px 1px 5px;
-    div {
+  padding: 2px 5px 1px 5px;
+  div {
     background-color: rgb(187, 255, 190);
     border-radius: 10px;
     max-width: -webkit-fill-available;
@@ -252,9 +250,9 @@ table {
   }
 }
 
-.send-loading{
+.send-loading {
   position: absolute;
   right: 10px;
   bottom: 60px;
-  opacity: .6;
+  opacity: 0.6;
 }
